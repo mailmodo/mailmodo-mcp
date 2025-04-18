@@ -61,7 +61,7 @@ server.tool("add",
     content: [{ type: "text", text: String(a + b) }]
   })
 );
-server.tool("Get Campaign Report for a campaign",
+server.tool("MailmodoCampainReportTool", "Tool to get the campaign reports for a particular campaign like open, click submission count etc",
   {
     campaignId: z.string().uuid(),
     fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
@@ -82,11 +82,23 @@ server.tool("Get Campaign Report for a campaign",
   }
 );
 
+server.tool("currentDateTime", "Get Current Date and time",
+  () => {
+    const dateString = new Date().toISOString();
+      return {
+        content: [{
+          type: "text",
+          text: dateString,
+      }]
+    }
+  }
+);
+
 // Start receiving messages on stdin and sending messages on stdout
 const transport = new StdioServerTransport();
 server.connect(transport)
   .then(() => {
-    console.log('Server connected successfully');
+    //console.log('Server connected successfully');
   })
   .catch((error) => {
     console.error('Failed to connect server:', error);
