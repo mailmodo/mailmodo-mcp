@@ -8,8 +8,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./",
-    "types": ["node", "jest"],
+    "rootDir": "./src",
+    "types": ["node"],
     "baseUrl": "./src"
   },
   "include": ["src/**/*", "test/**/*"],
