@@ -139,3 +139,43 @@ export async function unsubscribeContact(
         throw new Error('An unexpected error occurred');
     }
 }
+
+/**
+ * Resubscribes a contact using their email address
+ * @param email - Email address of the contact to unsubscribe
+ * @returns Promise with the API response
+ * @throws Error if email is not provided or if an unexpected error occurs
+ */
+export async function resubscribeContact(
+    email: string
+): Promise<AddContactToListResponse> {
+    if (!email) {
+        throw new Error('Email is a required field');
+    }
+
+    try {
+        const response = await axios.post<AddContactToListResponse>(
+            'https://api.mailmodo.com/api/v1/contacts/resubscribe',
+            {
+                email,
+            },
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Failed to unsubscribe contact'
+            };
+        }
+        throw new Error('An unexpected error occurred');
+    }
+}

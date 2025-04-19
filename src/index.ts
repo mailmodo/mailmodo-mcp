@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fetchAllCampaigns, fetchCampaignReport } from "./apicalls/fetchMailmodoCampaigns";
 import { eventPropertiesSchema } from "./types/addCustomEventsTypes";
 import { addMailmodoEvent } from "./apicalls/sendEvents";
-import { addContactToList, bulkAddContactToList, getAllContactLists, unsubscribeContact } from "./apicalls/contactManagement";
+import { addContactToList, bulkAddContactToList, getAllContactLists, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
 import { contactPropertiesSchema, datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
 
 config({ path: `.env` });
@@ -241,6 +241,38 @@ server.tool(
   async (params) => {
     try {
       const respone = await unsubscribeContact(params.email);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.success ?`Successfully unsubscribed '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to unsubscribe",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "resubscribeContact",
+  "Resubscribe contact in mailmodo",
+  {
+      email: z.string()
+  },
+  async (params) => {
+    try {
+      const respone = await resubscribeContact(params.email);
       
       // Here you would typically integrate with your event sending system
       // For example: eventBus.emit(eventName, eventData)
