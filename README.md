@@ -85,6 +85,26 @@ To configure this project with Claude Desktop, add the following configuration t
 }
 ```
 
+### Run from npx
+
+
+```json
+{
+  "mcpServers": {
+    "mailmodo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@mailmodo/mcp"
+      ],
+      "env": {
+        "MAILMODO_API_KEY": "<GET MAILMODO KEY from https://manage.mailmodo.com/app/settings/apikey and insert here>"
+      }
+    }
+  }
+}
+```
+
 
 Make sure to adjust the file path in the `args` array to match your local project directory.
 
