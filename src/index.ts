@@ -6,8 +6,8 @@ import { z } from "zod";
 import { fetchAllCampaigns, fetchCampaignReport } from "./apicalls/fetchMailmodoCampaigns";
 import { eventPropertiesSchema } from "./types/addCustomEventsTypes";
 import { addMailmodoEvent } from "./apicalls/sendEvents";
-import { addContactToList } from "./apicalls/contactManagement";
-import { datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
+import { addContactToList, bulkAddContactToList, getAllContactLists, unsubscribeContact } from "./apicalls/contactManagement";
+import { contactPropertiesSchema, datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
 
 config({ path: `.env` });
 // Create an MCP server
@@ -59,12 +59,21 @@ server.resource(
   }
 );
 
-server.tool("add",
-  { a: z.number(), b: z.number() },
-  async ({ a, b }) => ({
-    content: [{ type: "text", text: String(a + b) }]
-  })
+server.resource(
+  "Mailmodo Contact Lists",
+  "mailmodo://contact-lists",
+  {"mimeType": "application/json"},
+  async (uri) => {
+    const contactLists = await getAllContactLists();
+    return {
+      contents: [{
+        uri: uri.href,
+        text: JSON.stringify(contactLists.listDetails)
+      }]
+    }
+  }
 );
+
 server.tool("MailmodoCampainReportTool", "Tool to get the campaign reports for a particular campaign like open, click submission count etc",
   {
     campaignId: z.string().uuid(),
@@ -139,7 +148,7 @@ server.tool(
   {
       email: z.string(),
       listName: z.string(),
-      data: eventPropertiesSchema.optional(),
+      data: contactPropertiesSchema.optional(),
       created_at: datetimeSchema.optional(),
       last_click: datetimeSchema.optional(),
       last_open: datetimeSchema.optional(),
@@ -170,6 +179,84 @@ server.tool(
         content: [{
           type: "text",
           text: error instanceof Error ? error.message : "Failed to send event",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "addBulkContactToList",
+  "Add Many Contact to a list in single API",
+  {
+      listName: z.string(),
+      values: z.array(z.object({
+        email: z.string(),
+        data: contactPropertiesSchema.optional(),
+        created_at: datetimeSchema.optional(),
+        last_click: datetimeSchema.optional(),
+        last_open: datetimeSchema.optional(),
+        timezone: z
+          .string()
+          .regex(
+            timezoneRegex,
+            { message: "Must be a valid region-format timezone string" }
+          )
+          .optional(),
+      }))
+  },
+  async (params) => {
+    try {
+      const respone = await bulkAddContactToList(params);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.listId != '' ?`Successfully added '${params.values.length}' contacts to list ${params.listName}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to send event",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "unsubscribeContact",
+  "Unsubscribe or supress contact in mailmodo",
+  {
+      email: z.string()
+  },
+  async (params) => {
+    try {
+      const respone = await unsubscribeContact(params.email);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.success ?`Successfully unsubscribed '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to unsubscribe",
         }],
         isError: true
       };
