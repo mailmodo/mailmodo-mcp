@@ -179,3 +179,36 @@ export async function resubscribeContact(
         throw new Error('An unexpected error occurred');
     }
 }
+
+/**
+ * Retrieves contact details for a specific email from Mailmodo API
+ * @param email - Email address of the contact to retrieve details for
+ * @returns Promise with the API response containing contact details
+ * @throws Error if email is not provided or if an unexpected error occurs
+ */
+export async function getContactDetails(
+    email: string
+): Promise<any | null> {
+    if (!email) {
+        throw new Error('Email is a required field');
+    }
+
+    try {
+        const response = await axios.get<any>(
+            `https://api.mailmodo.com/api/v1/getContactDetails?email=${encodeURIComponent(email)}`,
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            return null;
+        }
+        throw new Error('An unexpected error occurred');
+    }
+}

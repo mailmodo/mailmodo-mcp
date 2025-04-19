@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fetchAllCampaigns, fetchCampaignReport } from "./apicalls/fetchMailmodoCampaigns";
 import { eventPropertiesSchema } from "./types/addCustomEventsTypes";
 import { addMailmodoEvent } from "./apicalls/sendEvents";
-import { addContactToList, bulkAddContactToList, getAllContactLists, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
+import { addContactToList, bulkAddContactToList, getAllContactLists, getContactDetails, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
 import { contactPropertiesSchema, datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
 
 config({ path: `.env` });
@@ -72,6 +72,22 @@ server.resource(
       }]
     }
   }
+);
+
+server.tool(
+  "userDetails",
+  "Tool to get all details of a contact ",
+  {
+    email: z.string(),
+  },
+  async ({ email }) => {
+    const details = await getContactDetails(email);
+    return{
+    content: [{
+      type: "text",
+      text: JSON.stringify(details)
+    }]
+  }}
 );
 
 server.tool("MailmodoCampainReportTool", "Tool to get the campaign reports for a particular campaign like open, click submission count etc",
