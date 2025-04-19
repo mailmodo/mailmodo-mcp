@@ -35,6 +35,6 @@ jobs:
           file: ${{ github.workspace }}/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/synthetics:${{ github.ref_name }}
-            ${{ secrets.DOCKER_USERNAME }}/synthetics:latest
+            ${{ secrets.DOCKER_USERNAME }}/mailmodo-mcp:${{ github.ref_name }}
+            ${{ secrets.DOCKER_USERNAME }}/mailmodo-mcp:latest
           platforms: linux/amd64
