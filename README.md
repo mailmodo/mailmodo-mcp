@@ -65,10 +65,12 @@ To configure this project with Claude Desktop, add the following configuration t
 ```json
 {
   "mcpServers": {
-    "google-maps": {
+    "mailmodo": {
       "command": "docker",
       "args": [
         "run",
+        "--platform", 
+        "linux/amd64",
         "-i",
         "--rm",
         "-e",

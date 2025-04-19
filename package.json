@@ -1,8 +1,14 @@
 {
-  "name": "mailmodo-mcp",
-  "version": "1.0.0",
+  "name": "@mailmodo/mcp",
+  "version": "0.0.2",
   "description": "Mailmodo MCP server for Public Mailmodo APIs",
   "main": "dist/index.js",
+  "bin": {
+    "mailmodo-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "start": "node dist/index.js",
     "build": "rm -rf build && tsc",
