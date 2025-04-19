@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fetchAllCampaigns, fetchCampaignReport } from "./apicalls/fetchMailmodoCampaigns";
 import { eventPropertiesSchema } from "./types/addCustomEventsTypes";
 import { addMailmodoEvent } from "./apicalls/sendEvents";
-import { addContactToList, bulkAddContactToList, getAllContactLists, getContactDetails, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
+import { addContactToList, bulkAddContactToList, deleteContact, getAllContactLists, getContactDetails, removeContactFromList, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
 import { contactPropertiesSchema, datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
 
 config({ path: `.env` });
@@ -311,6 +311,74 @@ server.tool(
     }
   }
 );
+
+server.tool(
+  "archiveContact",
+  "permanently archive contact in mailmodo",
+  {
+      email: z.string()
+  },
+  async (params) => {
+    try {
+      const respone = await deleteContact(params.email);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.success ?`Successfully deleted '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to delete",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "removeContactFromList",
+  "Remove a particular contact from the contact list",
+  {
+      email: z.string(),
+      listName: z.string(),
+      
+  },
+  async (params) => {
+    try {
+      const respone = await removeContactFromList(params.email, params.listName);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.success ?`Successfully deleted '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to delete",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+
 
 // Start receiving messages on stdin and sending messages on stdout
 const transport = new StdioServerTransport();

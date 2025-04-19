@@ -212,3 +212,74 @@ export async function getContactDetails(
         throw new Error('An unexpected error occurred');
     }
 }
+
+/**
+ * Removes a contact from a specified list in Mailmodo
+ * @param email - Email address of the contact to remove
+ * @param listName - Name of the list from which to remove the contact
+ * @returns Promise with the response message
+ * @throws AxiosError if the API call fails
+ */
+export const removeContactFromList = async (
+    email: string,
+    listName: string
+  ): Promise<AddContactToListResponse> => {
+    try {
+      const response = await axios.post<AddContactToListResponse>(
+        'https://api.mailmodo.com/api/v1/removeFromList',
+        {
+          email,
+          listName
+        },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw error;
+      }
+      throw new Error('Failed to remove contact from list');
+    }
+  };
+
+  /**
+ * Deletes a contact from Mailmodo
+ * @param email - Email address of the contact to delete
+ * @returns Promise with the API response
+ * @throws Error if an unexpected error occurs
+ */
+export async function deleteContact(
+    email: string
+): Promise<AddContactToListResponse> {
+    if (!email) {
+        throw new Error('Email is a required field');
+    }
+
+    try {
+        const response = await axios.delete<AddContactToListResponse>(
+            'https://api.mailmodo.com/api/v1/contacts',
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                },
+                data: { email }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        if (error instanceof AxiosError) {
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Failed to delete contact'
+            };
+        }
+        throw new Error('An unexpected error occurred');
+    }
+}
