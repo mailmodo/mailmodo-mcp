@@ -168,7 +168,7 @@ export async function resubscribeContact(
             }
         );
 
-        return response.data;
+        return {success: true, message: response.data.message};
     } catch (error) {
         if (error instanceof AxiosError) {
             return {

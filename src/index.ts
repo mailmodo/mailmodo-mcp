@@ -281,7 +281,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success ?`Successfully unsubscribed '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.success ?`Successfully resubscribed '${params.email}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
