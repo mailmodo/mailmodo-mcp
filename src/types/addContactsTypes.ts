@@ -97,3 +97,8 @@ export interface ContactListDetails {
 export interface GetContactListsResponse {
   listDetails: ContactListDetails[];
 }
+
+
+export interface RemoveContactFromListResponse {
+  message: string;
+}

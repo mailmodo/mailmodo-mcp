@@ -143,7 +143,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success?`Successfully sent event '${params.event_name}' for email ${params.email} with payload: ${JSON.stringify(params.event_properties)}`: `Something went wrong. Please check if the email is correct`,
+          text: respone.success?`Successfully sent event '${params.event_name}' for email ${params.email} with payload: ${JSON.stringify(params.event_properties)} with reference id ${respone.ref}`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
@@ -187,7 +187,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success?`Successfully added contact '${params.email}' to list ${params.listName}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.success?`Successfully added contact '${params.email}' to list ${params.listName} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
@@ -233,7 +233,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.listId != '' ?`Successfully added '${params.values.length}' contacts to list ${params.listName}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.listId != '' ?`Successfully added '${params.values.length}' contacts to list ${params.listName} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
@@ -265,7 +265,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success ?`Successfully unsubscribed '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.success ?`Successfully unsubscribed '${params.email} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
@@ -297,7 +297,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success ?`Successfully resubscribed '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.success ?`Successfully resubscribed '${params.email} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
@@ -329,7 +329,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success ?`Successfully deleted '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.success ?`Successfully deleted '${params.email} with message ${respone.message}`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
@@ -363,7 +363,7 @@ server.tool(
       return {
         content: [{
           type: "text",
-          text: respone.success ?`Successfully deleted '${params.email}.`: `Something went wrong. Please check if the email is correct`,
+          text: respone.message ?`Successfully reomved '${params.email} from the list ${params.listName} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {

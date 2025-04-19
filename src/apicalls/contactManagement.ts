@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AxiosError } from "axios";
-import { AddBatchContactToListResponse, AddContactToListResponse, BulkMailmodoContact, MailmodoContact, GetContactListsResponse } from "types/addContactsTypes";
+import { AddBatchContactToListResponse, AddContactToListResponse, BulkMailmodoContact, MailmodoContact, GetContactListsResponse, RemoveContactFromListResponse } from "types/addContactsTypes";
 
 /**
  * Sends an event to Mailmodo API using axios
@@ -223,9 +223,9 @@ export async function getContactDetails(
 export const removeContactFromList = async (
     email: string,
     listName: string
-  ): Promise<AddContactToListResponse> => {
+  ): Promise<RemoveContactFromListResponse> => {
     try {
-      const response = await axios.post<AddContactToListResponse>(
+      const response = await axios.post<RemoveContactFromListResponse>(
         'https://api.mailmodo.com/api/v1/removeFromList',
         {
           email,
@@ -234,13 +234,16 @@ export const removeContactFromList = async (
         {
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'mmApiKey': process.env.MAILMODO_API_KEY || ''
           }
         }
       );
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError) {
+        if(error.status === 400){
+            return {message: "This contact doesn't exists in list"};
+        }
         throw error;
       }
       throw new Error('Failed to remove contact from list');
@@ -268,13 +271,20 @@ export async function deleteContact(
                     'Accept': 'application/json',
                     'mmApiKey': process.env.MAILMODO_API_KEY || ''
                 },
-                data: { email }
+                data: {
+                    email
+                }
             }
         );
-
         return response.data;
     } catch (error) {
         if (error instanceof AxiosError) {
+            if(error.status === 400){
+                return {
+                    success: true,
+                    message: "User Doesn't exist in system or already archived"
+                };
+            }
             return {
                 success: false,
                 message: error.response?.data?.message || 'Failed to delete contact'
