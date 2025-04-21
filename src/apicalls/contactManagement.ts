@@ -9,6 +9,7 @@ import { AddBatchContactToListResponse, AddContactToListResponse, BulkMailmodoCo
  * @throws AxiosError if the request fails
  */
 export async function addContactToList(
+    mmApiKey: string,
     payload: MailmodoContact
 ): Promise<AddContactToListResponse> {
 
@@ -26,7 +27,7 @@ export async function addContactToList(
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );
@@ -41,6 +42,7 @@ export async function addContactToList(
 }
 
 export async function bulkAddContactToList(
+    mmApiKey: string,
     payload: BulkMailmodoContact
 ): Promise<AddBatchContactToListResponse> {
     const allHaveEmails = payload.values.every(user => typeof user.email === 'string' && user.email.trim() !== '');
@@ -58,7 +60,7 @@ export async function bulkAddContactToList(
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );
@@ -77,14 +79,14 @@ export async function bulkAddContactToList(
  * @returns Promise with the API response containing all contact lists
  * @throws AxiosError if the request fails
  */
-export async function getAllContactLists(): Promise<GetContactListsResponse> {
+export async function getAllContactLists(mmApiKey: string): Promise<GetContactListsResponse> {
     try {
         const response = await axios.get<GetContactListsResponse>(
             'https://api.mailmodo.com/api/v1/getAllContactLists',
             {
                 headers: {
                     'Accept': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );
@@ -107,6 +109,7 @@ export async function getAllContactLists(): Promise<GetContactListsResponse> {
  * @throws Error if email is not provided or if an unexpected error occurs
  */
 export async function unsubscribeContact(
+    mmApiKey: string,
     email: string
 ): Promise<AddContactToListResponse> {
     if (!email) {
@@ -123,7 +126,7 @@ export async function unsubscribeContact(
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );
@@ -147,6 +150,7 @@ export async function unsubscribeContact(
  * @throws Error if email is not provided or if an unexpected error occurs
  */
 export async function resubscribeContact(
+    mmApiKey: string,
     email: string
 ): Promise<AddContactToListResponse> {
     if (!email) {
@@ -163,7 +167,7 @@ export async function resubscribeContact(
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );
@@ -187,6 +191,7 @@ export async function resubscribeContact(
  * @throws Error if email is not provided or if an unexpected error occurs
  */
 export async function getContactDetails(
+    mmApiKey: string,
     email: string
 ): Promise<any | null> {
     if (!email) {
@@ -199,7 +204,7 @@ export async function getContactDetails(
             {
                 headers: {
                     'Accept': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );
@@ -221,6 +226,7 @@ export async function getContactDetails(
  * @throws AxiosError if the API call fails
  */
 export const removeContactFromList = async (
+    mmApiKey: string,
     email: string,
     listName: string
   ): Promise<RemoveContactFromListResponse> => {
@@ -234,7 +240,7 @@ export const removeContactFromList = async (
         {
           headers: {
             'Accept': 'application/json',
-            'mmApiKey': process.env.MAILMODO_API_KEY || ''
+            'mmApiKey': mmApiKey || ''
           }
         }
       );
@@ -257,6 +263,7 @@ export const removeContactFromList = async (
  * @throws Error if an unexpected error occurs
  */
 export async function deleteContact(
+    mmApiKey: string,
     email: string
 ): Promise<AddContactToListResponse> {
     if (!email) {
@@ -269,7 +276,7 @@ export async function deleteContact(
             {
                 headers: {
                     'Accept': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 },
                 data: {
                     email

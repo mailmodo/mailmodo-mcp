@@ -10,9 +10,11 @@
     "dist"
   ],
   "scripts": {
+    "start:server": "node dist/indexhttp.js",
     "start": "node dist/index.js",
     "build": "rm -rf build && tsc && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/temp && mv dist/temp dist/index.js && shx chmod +x dist/*.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "dev:server": "ts-node src/indexhttp.ts"
   },
   "author": "",
   "license": "ISC",
@@ -20,12 +22,14 @@
     "@modelcontextprotocol/sdk": "^1.10.1",
     "axios": "^1.8.4",
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "@types/node": "^20.4.5",
+    "shx": "^0.3.4",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.6",
-    "shx": "^0.3.4"
+    "typescript": "^5.1.6"
   }
 }

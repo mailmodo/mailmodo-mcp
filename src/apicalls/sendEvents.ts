@@ -11,6 +11,7 @@ import { AddCustomeEventResponse, MailmodoEvent } from "types/addCustomEventsTyp
  * @throws AxiosError if the request fails
  */
 export async function addMailmodoEvent(
+    mmApiKey: string,
     payload: MailmodoEvent
 ): Promise<AddCustomeEventResponse> {
 
@@ -29,7 +30,7 @@ export async function addMailmodoEvent(
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'mmApiKey': process.env.MAILMODO_API_KEY || ''
+                    'mmApiKey': mmApiKey || ''
                 }
             }
         );

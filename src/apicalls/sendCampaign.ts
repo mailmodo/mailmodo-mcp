@@ -9,6 +9,7 @@ import { BulkTriggerCampaignRequest, TriggerCampaignRequest, TriggerCampaignResp
  * @returns Promise with the campaign trigger response
  */
 export async function triggerMailmodoCampaign(
+    mmApiKey: string,
   campaignId: string,
   payload: TriggerCampaignRequest
 ): Promise<TriggerCampaignResponse> {
@@ -20,7 +21,7 @@ export async function triggerMailmodoCampaign(
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'mmApiKey': process.env.MAILMODO_API_KEY || ''
+          'mmApiKey': mmApiKey || ''
         }
       }
     );
@@ -41,6 +42,7 @@ export async function triggerMailmodoCampaign(
  * @returns Promise with the campaign trigger response
  */
 export async function bulkTriggerMailmodoCampaign(
+    mmApiKey: string,
     campaignId: string,
     payload: BulkTriggerCampaignRequest
   ): Promise<TriggerCampaignResponse> {
@@ -52,7 +54,7 @@ export async function bulkTriggerMailmodoCampaign(
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'mmApiKey': process.env.MAILMODO_API_KEY || ''
+            'mmApiKey': mmApiKey || ''
           }
         }
       );

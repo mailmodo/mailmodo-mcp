@@ -2,12 +2,12 @@ import axios from 'axios';
 import { CampaignApiResponse } from 'types/campaignApiResponse';
 import { CampaignReportResponse } from 'types/campaignReportResponse';
 
-export async function fetchAllCampaigns(): Promise<CampaignApiResponse> {
+export async function fetchAllCampaigns(mmApiKey: string): Promise<CampaignApiResponse> {
     try {
       const response = await axios.get('https://api.mailmodo.com/api/v1/campaigns', {
         headers: {
           'Accept': 'application/json',
-          'mmApiKey': process.env.MAILMODO_API_KEY || ''
+          'mmApiKey': mmApiKey || ''
         }
       });
       return response.data;
@@ -18,6 +18,7 @@ export async function fetchAllCampaigns(): Promise<CampaignApiResponse> {
   }
 
 export async function fetchCampaignReport(
+  mmApiKey: string,
   campaignId: string,
   fromDate: string, toDate: string
 ): Promise<CampaignReportResponse> {
@@ -32,7 +33,7 @@ export async function fetchCampaignReport(
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'mmApiKey': process.env.MAILMODO_API_KEY || ''
+          'mmApiKey': mmApiKey || ''
         }
       }
     );
