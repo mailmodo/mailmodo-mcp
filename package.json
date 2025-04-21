@@ -1,6 +1,6 @@
 {
   "name": "@mailmodo/mcp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Mailmodo MCP server for Public Mailmodo APIs",
   "main": "dist/index.js",
   "bin": {
@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "start": "node dist/index.js",
-    "build": "rm -rf build && tsc",
+    "build": "rm -rf build && tsc && echo '#!/usr/bin/env node' | cat - dist/index.js > dist/temp && mv dist/temp dist/index.js && shx chmod +x dist/*.js",
     "dev": "ts-node src/index.ts"
   },
   "author": "",
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/node": "^20.4.5",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "shx": "^0.3.4"
   }
 }
