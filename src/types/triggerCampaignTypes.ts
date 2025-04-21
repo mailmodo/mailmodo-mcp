@@ -15,3 +15,10 @@
     message: string;
     ref: string;
   }
+
+  export interface BulkTriggerCampaignRequest {
+    listId: string;
+    subject?: string;
+    idempotencyKey?: string;
+    campaign_data?: Record<string, string>;
+  }

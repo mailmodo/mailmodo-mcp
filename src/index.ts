@@ -8,7 +8,7 @@ import { eventPropertiesSchema } from "./types/addCustomEventsTypes";
 import { addMailmodoEvent } from "./apicalls/sendEvents";
 import { addContactToList, bulkAddContactToList, deleteContact, getAllContactLists, getContactDetails, removeContactFromList, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
 import { contactPropertiesSchema, datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
-import { triggerMailmodoCampaign } from "./apicalls/sendCampaign";
+import { bulkTriggerMailmodoCampaign, triggerMailmodoCampaign } from "./apicalls/sendCampaign";
 
 config({ path: `.env` });
 // Create an MCP server
@@ -432,6 +432,60 @@ server.tool(
         content: [{
           type: "text",
           text: respone.message ?`Successfully sent email to '${params.email} for the campaignId ${params.campaignId} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to delete",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "broadcastCampaignToList",
+  "The broadcast campaign API allows the user to trigger campaigns to the entire contact list using a single API request.",
+  {
+    campaignId: z.string().describe('Campaign id of the campaign to be triggered'),
+    listId: z
+      .string({
+        required_error: 'listId is required',
+        invalid_type_error: 'listId must be a string',
+      })
+      .describe('Id of the contact list or segment for which the campaign should be triggered.'),
+  
+    subject: z
+      .string()
+      .optional()
+      .describe('Optional subject line of the campaign. This will appear as the subject of the email sent to recipients.'),
+  
+    idempotencyKey: z
+      .string()
+      .optional()
+      .describe('Optional unique key to allow retries of the same campaign within 24 hours. Allows safe resending. For example: "2024-09-05T17:00:00Z".'),
+  
+    campaign_data: z
+      .record(z.string())
+      .optional()
+      .describe('Optional set of personalization parameters for the campaign. Each key represents a variable (e.g., "first_name") to be used in the email template. If a key is missing, the backend will fetch values from contact properties or default to an empty string.'),
+  },
+  async (params) => {
+    try {
+      const { campaignId, ...newparams } = params;
+      const respone = await bulkTriggerMailmodoCampaign(params.campaignId, newparams);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.message ?`Successfully sent email to '${params.listId} for the campaignId ${params.campaignId} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
