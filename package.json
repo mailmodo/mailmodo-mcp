@@ -1,6 +1,6 @@
 {
   "name": "@mailmodo/mcp",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Mailmodo MCP server for Public Mailmodo APIs",
   "main": "dist/index.js",
   "bin": {
