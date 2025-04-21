@@ -105,6 +105,26 @@ To configure this project with Claude Desktop, add the following configuration t
 }
 ```
 
+### Connect via Remote Server 
+```json
+{
+  "mcpServers": {
+    "mailmodo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.app.mailmodo.com/mcp",
+        "--header",
+        "mmApiKey:${MAILMODO_API_KEY}"
+      ],
+      "env": {
+        "MAILMODO_API_KEY": "<GET MAILMODO KEY from https://manage.mailmodo.com/app/settings/apikey and insert here>"
+      }
+    }
+  }
+}
+```
 
 Make sure to adjust the file path in the `args` array to match your local project directory.
 
