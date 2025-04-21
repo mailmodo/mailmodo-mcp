@@ -8,6 +8,7 @@ import { eventPropertiesSchema } from "./types/addCustomEventsTypes";
 import { addMailmodoEvent } from "./apicalls/sendEvents";
 import { addContactToList, bulkAddContactToList, deleteContact, getAllContactLists, getContactDetails, removeContactFromList, resubscribeContact, unsubscribeContact } from "./apicalls/contactManagement";
 import { contactPropertiesSchema, datetimeSchema, timezoneRegex } from "./types/addContactsTypes";
+import { triggerMailmodoCampaign } from "./apicalls/sendCampaign";
 
 config({ path: `.env` });
 // Create an MCP server
@@ -364,6 +365,73 @@ server.tool(
         content: [{
           type: "text",
           text: respone.message ?`Successfully reomved '${params.email} from the list ${params.listName} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: error instanceof Error ? error.message : "Failed to delete",
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "sendEmailToCampaign",
+  "Trigger and email for email campaign trigger with personalization parameter added to the email template. ",
+  {
+    campaignId: z.string().describe('Camapign id of the campaign to be triggered'),
+    email: z
+      .string()
+      .email({ message: "Invalid email address" })
+      .describe("Email address of the contact to whom you want to send the email. This is required."),
+  
+    subject: z
+      .string()
+      .optional()
+      .describe("Optional: Overrides the default subject line provided when creating the campaign."),
+  
+    replyTo: z
+      .string()
+      .optional()
+      .describe("Optional: Overrides the default reply-to email address for the campaign."),
+  
+    fromName: z
+      .string()
+      .optional()
+      .describe("Optional: Overrides the sender name for the campaign."),
+  
+    campaign_data: z
+      .record(z.string())
+      .optional()
+      .describe("Optional: Transient personalization parameters, not stored in the contact profile."),
+  
+    data: z
+      .record(z.string())
+      .optional()
+      .describe("Optional: Personalization parameters saved to the contact's profile."),
+  
+    addToList: z
+      .string()
+      .optional()
+      .describe("Optional: List ID to which the contact should be added as part of triggering the campaign."),
+  },
+  async (params) => {
+    try {
+      const { campaignId, ...newparams } = params;
+      const respone = await triggerMailmodoCampaign(params.campaignId, newparams);
+      
+      // Here you would typically integrate with your event sending system
+      // For example: eventBus.emit(eventName, eventData)
+      
+      // For demonstration, we'll just return a success message
+      return {
+        content: [{
+          type: "text",
+          text: respone.message ?`Successfully sent email to '${params.email} for the campaignId ${params.campaignId} with message ${respone.message}.`: `Something went wrong. Please check if the email is correct`,
         }]
       };
     } catch (error) {
