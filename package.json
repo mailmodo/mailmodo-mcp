@@ -2,6 +2,10 @@
   "name": "@mailmodo/mcp",
   "version": "0.1.0",
   "description": "Mailmodo MCP server for Public Mailmodo APIs",
+  "repository": {
+        "type": "git",
+        "url": "https://github.com/mailmodo/mailmodo-mcp"
+  },
   "main": "dist/index.js",
   "bin": {
     "mailmodo-mcp": "dist/index.js"
