@@ -163,6 +163,114 @@ mailmodo-mcp/
 └── tsconfig.json    # TypeScript configuration
 ```
 
+## Tools and Resources
+
+The Mailmodo MCP server provides several tools and resources for interacting with Mailmodo's functionality. Here's a comprehensive list:
+
+### Resources
+
+1. **Mailmodo Templates** (`mailmodo://templates`)
+   - Returns a list of all available email templates in JSON format
+   - MIME Type: application/json
+
+2. **Mailmodo Campaigns** (`mailmodo://campaigns`)
+   - Returns a list of all campaigns in JSON format
+   - MIME Type: application/json
+
+3. **Mailmodo Contact Lists** (`mailmodo://contact-lists`)
+   - Returns all contact lists in JSON format
+   - MIME Type: application/json
+
+### Tools
+
+1. **User Details**
+   - Name: `userDetails`
+   - Description: Get all details of a contact
+   - Parameters:
+     - `email` (string): Email address of the contact
+
+2. **Campaign Report Tool**
+   - Name: `MailmodoCampainReportTool`
+   - Description: Get campaign reports including open, click, and submission counts
+   - Parameters:
+     - `campaignId` (UUID): ID of the campaign
+     - `fromDate` (YYYY-MM-DD): Start date for the report
+     - `toDate` (YYYY-MM-DD): End date for the report
+
+3. **Current DateTime**
+   - Name: `currentDateTime`
+   - Description: Get current date and time
+   - Parameters: None
+
+4. **Send Event**
+   - Name: `sendEvent`
+   - Description: Send custom events with email and event properties
+   - Parameters:
+     - `email` (string): Contact's email address
+     - `event_name` (string): Name of the event
+     - `ts` (number, optional): Timestamp
+     - `event_properties` (object, optional): Additional event properties
+
+5. **Contact List Management**
+   - **Add Contact to List**
+     - Name: `addContactToList`
+     - Description: Add a single contact to a list
+     - Parameters:
+       - `email` (string): Contact's email
+       - `listName` (string): Name of the list
+       - `data` (object, optional): Contact properties
+       - Various optional fields for contact metadata
+
+   - **Bulk Add Contacts**
+     - Name: `addBulkContactToList`
+     - Description: Add multiple contacts to a list in a single operation
+     - Parameters:
+       - `listName` (string): Name of the list
+       - `values` (array): Array of contact objects
+
+   - **Remove Contact from List**
+     - Name: `removeContactFromList`
+     - Description: Remove a contact from a specific list
+     - Parameters:
+       - `email` (string): Contact's email
+       - `listName` (string): Name of the list
+
+6. **Contact Status Management**
+   - **Unsubscribe Contact**
+     - Name: `unsubscribeContact`
+     - Description: Unsubscribe or suppress a contact
+     - Parameters:
+       - `email` (string): Contact's email
+
+   - **Resubscribe Contact**
+     - Name: `resubscribeContact`
+     - Description: Resubscribe a previously unsubscribed contact
+     - Parameters:
+       - `email` (string): Contact's email
+
+   - **Archive Contact**
+     - Name: `archiveContact`
+     - Description: Permanently archive a contact
+     - Parameters:
+       - `email` (string): Contact's email
+
+7. **Campaign Management**
+   - **Send Email Campaign**
+     - Name: `sendEmailToCampaign`
+     - Description: Trigger an email campaign with personalization
+     - Parameters:
+       - `campaignId` (string): Campaign ID
+       - `email` (string): Recipient's email
+       - Various optional parameters for customization
+
+   - **Broadcast Campaign**
+     - Name: `broadcastCampaignToList`
+     - Description: Trigger campaigns to an entire contact list
+     - Parameters:
+       - `campaignId` (string): Campaign ID
+       - `listId` (string): Target list ID
+       - Optional parameters for campaign customization
+
 ## License
 
 [MIT License](LICENSE)
