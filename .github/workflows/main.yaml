@@ -32,7 +32,7 @@ jobs:
           context: ${{ github.workspace }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          file: ${{ github.workspace }}/Dockerfile
+          file: ${{ github.workspace }}/Dockerfile.server
           push: true
           tags: |
             ${{ secrets.ACR_SERVER }}/mm-mcp-prod:${{ github.sha }}
