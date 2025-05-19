@@ -35,7 +35,7 @@ const validateMmApiKey = (
     next();
   };
 
-app.use(validateMmApiKey);
+// app.use(validateMmApiKey);
 
 async function getMcpServer(req: Request, transport: Transport){
     let server: McpServer; 
@@ -91,7 +91,7 @@ app.get('/mcp', async (req: Request, res: Response) => {
   });
   
 // Messages endpoint for receiving client JSON-RPC requests
-app.post('/messages', async (req: Request, res: Response) => {
+app.post('/messages',validateMmApiKey, async (req: Request, res: Response) => {
     console.log('Received POST request to /messages');
   
     // Extract session ID from URL query parameter
