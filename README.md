@@ -1,5 +1,7 @@
 # mailmodo-mcp
 
+[![smithery badge](https://smithery.ai/badge/@mailmodo/mailmodo-mcp)](https://smithery.ai/server/@mailmodo/mailmodo-mcp)
+
 This is a TypeScript project that implements a Message Control Protocol (MCP) server for Mailmodo integration with Claude Desktop and other MCP supported client.
 
 ## Prerequisites
@@ -9,6 +11,15 @@ This is a TypeScript project that implements a Message Control Protocol (MCP) se
 
 ## Installation
 
+### Installing via Smithery
+
+To install Mailmodo Integration Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@mailmodo/mailmodo-mcp):
+
+```bash
+npx -y @smithery/cli install @mailmodo/mailmodo-mcp --client claude
+```
+
+### Manual Installation
 1. Clone the repository:
 ```bash
 git clone https://github.com/mailmodo/mailmodo-mcp.git
