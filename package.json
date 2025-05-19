@@ -1,6 +1,6 @@
 {
   "name": "@mailmodo/mcp",
-  "version": "0.1.2",
+  "version": "0.2.1",
   "description": "Mailmodo MCP server for Public Mailmodo APIs",
   "repository": {
         "type": "git",
