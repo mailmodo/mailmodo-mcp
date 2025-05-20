@@ -4,6 +4,10 @@
 
 This is a TypeScript project that implements a Message Control Protocol (MCP) server for Mailmodo integration with Claude Desktop and other MCP supported client.
 
+<a href="https://glama.ai/mcp/servers/@mailmodo/mailmodo-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@mailmodo/mailmodo-mcp/badge" alt="Mailmodo MCP server" />
+</a>
+
 ## Prerequisites
 
 - Node.js (v20 or higher recommended)
