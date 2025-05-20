@@ -96,13 +96,20 @@ export function createMcpServer(mmApiKey: string){
         }
       );
       
-      server.tool("currentDateTime", "Get Current Date and time",
-        () => {
-          const dateString = new Date().toISOString();
+      server.tool("currentDateTime", "Get Current Date and time for timezone. if timezone is not passed default to UTC",
+        {
+            timezone: z.string().optional().nullable().describe(`The timezone should be a valid IANA timezone name like "America/New_York" or "Asia/Kolkata"`),
+        },
+        (data) => {
+          const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: data.timezone || "UTC",
+          dateStyle: "full",
+          timeStyle: "long",
+        });
             return {
               content: [{
                 type: "text",
-                text: dateString,
+                text: formatter.format(new Date()),
             }]
           }
         }
