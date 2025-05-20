@@ -17,7 +17,11 @@ const validateMmApiKey = (
     res: Response,
     next: NextFunction
   ): void => {
-    const mmApiKey = req.headers['authorization'] as string | undefined || req.headers['mmapikey'] as string;
+    let mmApiKey = req.headers['authorization'] as string | undefined || req.headers['mmapikey'] as string;
+    if(!mmApiKey){
+      mmApiKey = req.query['mmapikey'] as string;
+    }
+    
   
     if (!mmApiKey) {
       res.status(400).json({
@@ -35,7 +39,7 @@ const validateMmApiKey = (
     next();
   };
 
-// app.use(validateMmApiKey);
+app.use(validateMmApiKey);
 
 async function getMcpServer(req: Request, transport: Transport){
     let server: McpServer; 
@@ -91,7 +95,7 @@ app.get('/mcp', async (req: Request, res: Response) => {
   });
   
 // Messages endpoint for receiving client JSON-RPC requests
-app.post('/messages',validateMmApiKey, async (req: Request, res: Response) => {
+app.post('/messages', async (req: Request, res: Response) => {
     console.log('Received POST request to /messages');
   
     // Extract session ID from URL query parameter
@@ -110,7 +114,6 @@ app.post('/messages',validateMmApiKey, async (req: Request, res: Response) => {
       res.status(404).send('Session not found');
       return;
     }
-  
     try {
       // Handle the POST message with the transport
       await transport.handlePostMessage(req, res, req.body);
