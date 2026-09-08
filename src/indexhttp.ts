@@ -4,6 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMcpServer } from "./server";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 
 const app = express();
@@ -16,11 +17,34 @@ app.use(express.json());
 // makes whichever transport connected last receive all the traffic. Claude
 // Desktop opens two sessions with the same key (chat + Cowork/Code), which is
 // how ACE-11080 showed up: one session got both replies, the other starved.
-type SseSession = { server: McpServer; transport: SSEServerTransport };
-type StreamableSession = { server: McpServer; transport: StreamableHTTPServerTransport };
+type SseSession = {
+  server: McpServer;
+  transport: SSEServerTransport;
+  res: Response;
+};
+type StreamableSession = {
+  server: McpServer;
+  transport: StreamableHTTPServerTransport;
+  lastActivity: number;
+  // Number of open standalone SSE streams. A session can sit idle for hours
+  // with a healthy stream attached, so it must not be swept while this is > 0.
+  openStreams: number;
+};
 
 const sseSessions: Record<string, SseSession> = {};
 const streamableSessions: Record<string, StreamableSession> = {};
+
+// A Streamable HTTP session is only torn down by an explicit DELETE, because
+// the SDK transport's disconnect handlers just drop the stream from its
+// internal map and never fire `onclose`. Clients routinely go away without
+// sending one: mcp-remote abandons a connection-check session on every single
+// connection, and any client that is killed rather than closed leaves its
+// session behind too. Each orphan pins an McpServer and the API key it closes
+// over, so without a sweeper the map grows on every connect, forever.
+const SESSION_IDLE_TIMEOUT_MS =
+  Number(process.env.SESSION_IDLE_TIMEOUT_MS) || 30 * 60 * 1000;
+const SESSION_SWEEP_INTERVAL_MS =
+  Number(process.env.SESSION_SWEEP_INTERVAL_MS) || 5 * 60 * 1000;
 
 const missingApiKeyError = {
   jsonrpc: '2.0',
@@ -61,6 +85,44 @@ const extractMmApiKey = (
 
 app.use(extractMmApiKey);
 
+async function closeSession(
+  session: { server: McpServer; transport: Transport }
+): Promise<void> {
+  try {
+    await session.transport.close();
+    await session.server.close();
+  } catch (error) {
+    console.error('Error closing session:', error);
+  }
+}
+
+function sweepIdleSessions(): void {
+  const now = Date.now();
+
+  for (const [sessionId, session] of Object.entries(streamableSessions)) {
+    if (session.openStreams > 0) continue;
+    if (now - session.lastActivity < SESSION_IDLE_TIMEOUT_MS) continue;
+
+    console.log(`Sweeping idle Streamable HTTP session ${sessionId}`);
+    delete streamableSessions[sessionId];
+    void closeSession(session);
+  }
+
+  // Insurance against a 'close' event we never saw on a half-open connection.
+  // Only ever removes a response that is already closed, so it cannot cut off
+  // a live stream.
+  for (const [sessionId, session] of Object.entries(sseSessions)) {
+    if (!session.res.closed) continue;
+
+    console.log(`Sweeping closed SSE session ${sessionId}`);
+    delete sseSessions[sessionId];
+    void closeSession(session);
+  }
+}
+
+const sweepTimer = setInterval(sweepIdleSessions, SESSION_SWEEP_INTERVAL_MS);
+sweepTimer.unref();
+
 // Legacy HTTP+SSE transport: the stream is opened with GET /mcp and requests
 // are posted to /messages. Kept for mcp-remote's SSE fallback and any client
 // already pointed at this endpoint.
@@ -88,7 +150,7 @@ async function handleSseStream(req: Request, res: Response): Promise<void> {
 
   // Registered before connect(): connect() writes the endpoint event carrying
   // this session ID, so the client may POST to /messages immediately after.
-  sseSessions[sessionId] = { server, transport };
+  sseSessions[sessionId] = { server, transport, res };
   await server.connect(transport);
 
   console.log(`Established SSE stream with session ID: ${sessionId}`);
@@ -110,7 +172,11 @@ app.post('/mcp', async (req: Request, res: Response) => {
         });
         return;
       }
+      session.lastActivity = Date.now();
       await session.transport.handleRequest(req, res, req.body);
+      // Refreshed again on the way out: a long-running tool call should not
+      // leave the session looking idle for the whole time it was working.
+      session.lastActivity = Date.now();
       return;
     }
 
@@ -130,7 +196,12 @@ app.post('/mcp', async (req: Request, res: Response) => {
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (newSessionId) => {
         console.log(`Established Streamable HTTP session ${newSessionId}`);
-        streamableSessions[newSessionId] = { server, transport };
+        streamableSessions[newSessionId] = {
+          server,
+          transport,
+          lastActivity: Date.now(),
+          openStreams: 0,
+        };
       },
     });
 
@@ -172,6 +243,17 @@ app.get('/mcp', async (req: Request, res: Response) => {
         res.status(404).send('Session not found');
         return;
       }
+      // While this stream is open the client is demonstrably still there, so
+      // the sweeper must leave the session alone however long it stays quiet.
+      session.lastActivity = Date.now();
+      session.openStreams += 1;
+      res.on('close', () => {
+        session.openStreams -= 1;
+        // Reset the idle clock on the way out so a client that briefly drops
+        // and reconnects is not swept in the window before it comes back.
+        session.lastActivity = Date.now();
+      });
+
       await session.transport.handleRequest(req, res);
       return;
     }
@@ -247,6 +329,7 @@ app.listen(3000);
 // Handle server shutdown
 process.on('SIGTERM', async () => {
     console.log('Shutting down server...');
+    clearInterval(sweepTimer);
 
     const sessions = [
       ...Object.entries(sseSessions),
@@ -254,13 +337,8 @@ process.on('SIGTERM', async () => {
     ];
 
     for (const [sessionId, session] of sessions) {
-        try {
-          console.log(`Closing session ${sessionId}`);
-          await session.transport.close();
-          await session.server.close();
-        } catch (error) {
-          console.error(`Error closing session ${sessionId}:`, error);
-        }
+        console.log(`Closing session ${sessionId}`);
+        await closeSession(session);
       }
     console.log('Server shutdown complete');
     process.exit(0);
