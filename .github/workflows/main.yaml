@@ -50,13 +50,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_MCP_PROD }}
 
-      - name: Azure CLI script to create Container App
+      - name: Azure CLI script to update Container App
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            RESOURCE_GROUP="rg-mm-apps-prod-sup"
-            LOCATION="westus"
-            CONTAINERAPPS_ENVIRONMENT="cae-mm-supplementry-consumption"
+            set -euo pipefail
+
+            # These must match the live resource. The app is NOT in the
+            # consumption environment the rest of the supplementary apps use:
+            # it sits in rg-mm-apps-prod / cae-mm-container-apps-prod, where
+            # Pulumi declares it (min/max replica 1, ingress port 3000,
+            # mcp.app.mailmodo.com custom domain).
+            RESOURCE_GROUP="rg-mm-apps-prod"
             az extension add --name containerapp --upgrade
 
             az containerapp update -n mm-mcp-prod -g $RESOURCE_GROUP \
