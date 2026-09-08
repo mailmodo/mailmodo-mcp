@@ -14,9 +14,10 @@ app.use(express.json());
 //
 // The SDK's Protocol keeps a *single* `_transport` field per server and sends
 // every response through it, so connecting one server to several transports
-// makes whichever transport connected last receive all the traffic. Claude
-// Desktop opens two sessions with the same key (chat + Cowork/Code), which is
-// how ACE-11080 showed up: one session got both replies, the other starved.
+// makes whichever transport connected last receive all the traffic. Two
+// concurrent sessions on one key are enough to trigger it: one of them
+// receives both sets of replies while the other waits on responses that never
+// arrive, until it gives up and reconnects.
 type SseSession = {
   server: McpServer;
   transport: SSEServerTransport;
@@ -37,7 +38,7 @@ const streamableSessions: Record<string, StreamableSession> = {};
 // A Streamable HTTP session is only torn down by an explicit DELETE, because
 // the SDK transport's disconnect handlers just drop the stream from its
 // internal map and never fire `onclose`. Clients routinely go away without
-// sending one: mcp-remote abandons a connection-check session on every single
+// sending one: mcp-remote 0.8.3 abandons a connection-check session on every
 // connection, and any client that is killed rather than closed leaves its
 // session behind too. Each orphan pins an McpServer and the API key it closes
 // over, so without a sweeper the map grows on every connect, forever.

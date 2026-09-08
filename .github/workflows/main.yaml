@@ -56,11 +56,8 @@ jobs:
           inlineScript: |
             set -euo pipefail
 
-            # These must match the live resource. The app is NOT in the
-            # consumption environment the rest of the supplementary apps use:
-            # it sits in rg-mm-apps-prod / cae-mm-container-apps-prod, where
-            # Pulumi declares it (min/max replica 1, ingress port 3000,
-            # mcp.app.mailmodo.com custom domain).
+            # Must match the resource group of the live container app, which
+            # is declared in the Pulumi stack. Keep the two in step.
             RESOURCE_GROUP="rg-mm-apps-prod"
             az extension add --name containerapp --upgrade
 
