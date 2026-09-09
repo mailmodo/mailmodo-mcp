@@ -30,6 +30,11 @@ type StreamableSession = {
   // Number of open standalone SSE streams. A session can sit idle for hours
   // with a healthy stream attached, so it must not be swept while this is > 0.
   openStreams: number;
+  // Requests currently being handled. lastActivity is only refreshed either
+  // side of a request, so a single call that outlasts the idle timeout would
+  // otherwise look abandoned while it is still running. Nothing bounds how
+  // long that can take: none of the upstream axios calls set a timeout.
+  inFlight: number;
 };
 
 const sseSessions: Record<string, SseSession> = {};
@@ -102,6 +107,7 @@ function sweepIdleSessions(): void {
 
   for (const [sessionId, session] of Object.entries(streamableSessions)) {
     if (session.openStreams > 0) continue;
+    if (session.inFlight > 0) continue;
     if (now - session.lastActivity < SESSION_IDLE_TIMEOUT_MS) continue;
 
     console.log(`Sweeping idle Streamable HTTP session ${sessionId}`);
@@ -174,10 +180,16 @@ app.post('/mcp', async (req: Request, res: Response) => {
         return;
       }
       session.lastActivity = Date.now();
+      // Tracked on the response, not around the await: handleRequest returns
+      // once it has dispatched the message, while the tool it triggered runs
+      // on and writes to `res` later. Awaiting it therefore says nothing about
+      // whether work is still in progress; `res` staying open does.
+      session.inFlight += 1;
+      res.on('close', () => {
+        session.inFlight -= 1;
+        session.lastActivity = Date.now();
+      });
       await session.transport.handleRequest(req, res, req.body);
-      // Refreshed again on the way out: a long-running tool call should not
-      // leave the session looking idle for the whole time it was working.
-      session.lastActivity = Date.now();
       return;
     }
 
@@ -202,6 +214,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
           transport,
           lastActivity: Date.now(),
           openStreams: 0,
+          inFlight: 0,
         };
       },
     });
