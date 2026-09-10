@@ -50,13 +50,15 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_MCP_PROD }}
 
-      - name: Azure CLI script to create Container App
+      - name: Azure CLI script to update Container App
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            RESOURCE_GROUP="rg-mm-apps-prod-sup"
-            LOCATION="westus"
-            CONTAINERAPPS_ENVIRONMENT="cae-mm-supplementry-consumption"
+            set -euo pipefail
+
+            # Must match the resource group of the live container app, which
+            # is declared in the Pulumi stack. Keep the two in step.
+            RESOURCE_GROUP="rg-mm-apps-prod"
             az extension add --name containerapp --upgrade
 
             az containerapp update -n mm-mcp-prod -g $RESOURCE_GROUP \

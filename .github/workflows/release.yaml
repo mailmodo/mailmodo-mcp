@@ -41,6 +41,7 @@ jobs:
   
   check-test-and-publish:
     runs-on: ubuntu-latest
+    needs: build-and-push
     environment: production
     timeout-minutes: 5
     steps:
@@ -53,9 +54,17 @@ jobs:
           with:
               node-version: '20.x'
 
-        - name: Install & Run ESLint and TS checks
-          run: |
+        # The release tag is the source of truth for the published version.
+        # Bumping package.json by hand was missed for 0.0.1, 0.1.1 and 0.2.0:
+        # each was tagged and released on GitHub, then rejected by npm as a
+        # duplicate of whatever version package.json still carried, so those
+        # three releases never reached the registry. Deriving it from the tag
+        # makes that failure mode impossible.
+        - name: Set version from release tag
+          run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
 
+        - name: Install and build
+          run: |
               npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}
               npm i
               npm run build

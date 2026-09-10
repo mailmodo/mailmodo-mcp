@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.npm npm install
 
 RUN npm run build
 
-RUN --mount=type=cache,target=/root/.npm-production npm ci --ignore-scripts --omit-dev
+RUN --mount=type=cache,target=/root/.npm-production npm ci --ignore-scripts --omit=dev
 
 FROM node:22-alpine AS release
 
@@ -23,6 +23,6 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-RUN npm ci --ignore-scripts --omit-dev
+RUN npm ci --ignore-scripts --omit=dev
 
 ENTRYPOINT ["node", "dist/index.js"]
