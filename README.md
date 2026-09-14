@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/mailmodo-mailmodo-mcp-badge.png)](https://mseep.ai/app/mailmodo-mailmodo-mcp)
+
 # mailmodo-mcp
 
 [![smithery badge](https://smithery.ai/badge/@mailmodo/mailmodo-mcp)](https://smithery.ai/server/@mailmodo/mailmodo-mcp)
