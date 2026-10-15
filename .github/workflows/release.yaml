@@ -52,7 +52,7 @@ jobs:
         - name: Set up Node.js version
           uses: actions/setup-node@v1
           with:
-              node-version: '20.x'
+              node-version: '24.x'
 
         # The release tag is the source of truth for the published version.
         # Bumping package.json by hand was missed for 0.0.1, 0.1.1 and 0.2.0:
